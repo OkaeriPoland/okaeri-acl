@@ -2,6 +2,7 @@ package eu.okaeri.acl.testgroovyguardian;
 
 import eu.okaeri.acl.groovy.GroovyGuardian;
 import eu.okaeri.acl.guard.Guard;
+import eu.okaeri.acl.guardian.Guardian;
 import eu.okaeri.acl.guardian.GuardianAction;
 import eu.okaeri.acl.guardian.GuardianContext;
 import eu.okaeri.acl.guardian.GuardianViolation;
@@ -20,35 +21,34 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TestGroovyGuardian {
 
+    private final Guardian guardian = GroovyGuardian.create();
+
     @Test
     @SneakyThrows
     public void should_allow_no_guards() {
 
-        GroovyGuardian guardian = GroovyGuardian.create();
         GuardianContext context = GuardianContext.of().with("key", "value");
         Method method = EmptyType.class.getMethod("doNothing");
 
-        assertTrue(guardian.allows(method, context));
-        assertTrue(guardian.inspect(method, context).isEmpty());
+        assertTrue(this.guardian.allows(method, context));
+        assertTrue(this.guardian.inspect(method, context).isEmpty());
     }
 
     @Test
     @SneakyThrows
     public void should_allow_in_mode_boolean() {
 
-        GroovyGuardian guardian = GroovyGuardian.create();
         GuardianContext context = GuardianContext.of().with("player", new FakePlayer().perm("test:admin"));
         Method method = GuardedType.class.getMethod("simpleWithBoolean");
 
-        assertTrue(guardian.allows(method, context));
-        assertEquals(0, guardian.inspect(method, context).size());
+        assertTrue(this.guardian.allows(method, context));
+        assertEquals(0, this.guardian.inspect(method, context).size());
     }
 
     @Test
     @SneakyThrows
     public void should_deny_in_mode_boolean() {
 
-        GroovyGuardian guardian = GroovyGuardian.create();
         GuardianContext context = GuardianContext.of().with("player", new FakePlayer().perm("test:user"));
         Method method = GuardedType.class.getMethod("simpleWithBoolean");
 
@@ -60,66 +60,59 @@ public class TestGroovyGuardian {
             GuardianAction.DENY
         );
 
-        assertFalse(guardian.allows(method, context));
-        assertIterableEquals(Collections.singletonList(violation), guardian.inspect(method, context));
+        assertFalse(this.guardian.allows(method, context));
+        assertIterableEquals(Collections.singletonList(violation), this.guardian.inspect(method, context));
     }
 
     @Test
     @SneakyThrows
     public void should_allow_in_mode_allow() {
-        GroovyGuardian guardian = GroovyGuardian.create();
         GuardianContext context = GuardianContext.of().with("player", new FakePlayer().role("ADMIN"));
-        assertTrue(guardian.allows(GuardedType.class.getMethod("simpleWithAllow"), context));
+        assertTrue(this.guardian.allows(GuardedType.class.getMethod("simpleWithAllow"), context));
     }
 
     @Test
     @SneakyThrows
     public void should_deny_in_mode_allow() {
-        GroovyGuardian guardian = GroovyGuardian.create();
         GuardianContext context = GuardianContext.of().with("player", new FakePlayer().role("USER"));
-        assertFalse(guardian.allows(GuardedType.class.getMethod("simpleWithAllow"), context));
+        assertFalse(this.guardian.allows(GuardedType.class.getMethod("simpleWithAllow"), context));
     }
 
     @Test
     @SneakyThrows
     public void should_allow_in_mode_deny() {
-        GroovyGuardian guardian = GroovyGuardian.create();
         GuardianContext context = GuardianContext.of().with("player", new FakePlayer().role("ADMIN"));
-        assertTrue(guardian.allows(GuardedType.class.getMethod("simpleWithDeny"), context));
+        assertTrue(this.guardian.allows(GuardedType.class.getMethod("simpleWithDeny"), context));
     }
 
     @Test
     @SneakyThrows
     public void should_deny_in_mode_deny() {
-        GroovyGuardian guardian = GroovyGuardian.create();
         GuardianContext context = GuardianContext.of().with("player", new FakePlayer().role("BANNED"));
-        assertFalse(guardian.allows(GuardedType.class.getMethod("simpleWithDeny"), context));
+        assertFalse(this.guardian.allows(GuardedType.class.getMethod("simpleWithDeny"), context));
     }
 
     @Test
     @SneakyThrows
     public void should_allow_in_mode_boolean_multi() {
-        GroovyGuardian guardian = GroovyGuardian.create();
         GuardianContext context = GuardianContext.of().with("player", new FakePlayer().perm("test:admin").role("ADMIN"));
-        assertTrue(guardian.allows(GuardedType.class.getMethod("multiWithBoolean"), context));
+        assertTrue(this.guardian.allows(GuardedType.class.getMethod("multiWithBoolean"), context));
     }
 
     @Test
     @SneakyThrows
     public void should_deny_in_mode_boolean_multi() {
 
-        GroovyGuardian guardian = GroovyGuardian.create();
-
         // no perm and role
-        assertFalse(guardian.allows(GuardedType.class.getMethod("multiWithBoolean"),
+        assertFalse(this.guardian.allows(GuardedType.class.getMethod("multiWithBoolean"),
             GuardianContext.of().with("player", new FakePlayer())));
 
         // perm mismatch
-        assertFalse(guardian.allows(GuardedType.class.getMethod("multiWithBoolean"),
+        assertFalse(this.guardian.allows(GuardedType.class.getMethod("multiWithBoolean"),
             GuardianContext.of().with("player", new FakePlayer().perm("test:user"))));
 
         // role mismatch
-        assertFalse(guardian.allows(GuardedType.class.getMethod("multiWithBoolean"),
+        assertFalse(this.guardian.allows(GuardedType.class.getMethod("multiWithBoolean"),
             GuardianContext.of().with("player", new FakePlayer().role("BANNED"))));
     }
 
@@ -127,9 +120,7 @@ public class TestGroovyGuardian {
     @SneakyThrows
     public void should_deny_in_mode_boolean_multi_inspect() {
 
-        GroovyGuardian guardian = GroovyGuardian.create();
-
-        List<GuardianViolation> violations = guardian.inspect(
+        List<GuardianViolation> violations = this.guardian.inspect(
             GuardedType.class.getMethod("multiWithBoolean"),
             GuardianContext.of().with("player", new FakePlayer().perm("test:user").role("BANNED"))
         );
