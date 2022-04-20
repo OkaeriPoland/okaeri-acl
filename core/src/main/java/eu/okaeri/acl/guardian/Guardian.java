@@ -50,18 +50,26 @@ public class Guardian {
     }
 
     public boolean allows(@NonNull Guard guard, @NonNull GuardianContext context) {
+
+        long start = System.currentTimeMillis();
         String result = this.evaluate(guard, context);
+
         if (DEBUG) {
-            LOGGER.info(guard + " was evaluated to " + result + " with " + context);
+            long took = System.currentTimeMillis() - start;
+            LOGGER.info(guard + " was evaluated to '" + result + "' in " + took + " ms with " + context);
         }
+
         return this.allows(guard, result);
     }
 
     public List<GuardianViolation> inspect(@NonNull Guard guard, @NonNull GuardianContext context) {
 
+        long start = System.currentTimeMillis();
         String result = this.evaluate(guard, context);
+
         if (DEBUG) {
-            LOGGER.info(guard + " was evaluated to " + result + " with " + context);
+            long took = System.currentTimeMillis() - start;
+            LOGGER.info(guard + " was evaluated to '" + result + "' in " + took + " ms with " + context);
         }
 
         boolean allows = this.allows(guard, result);

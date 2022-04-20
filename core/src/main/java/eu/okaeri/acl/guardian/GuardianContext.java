@@ -26,4 +26,11 @@ public class GuardianContext {
         this.data.put(key, value);
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "GuardianContext(" +
+            "data=" + data.keySet() +
+            ')';
+    }
 }
