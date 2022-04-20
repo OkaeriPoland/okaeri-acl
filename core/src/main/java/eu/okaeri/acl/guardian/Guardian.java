@@ -20,6 +20,17 @@ public class Guardian {
     private static final Logger LOGGER = Logger.getLogger(Guardian.class.getSimpleName());
 
     protected GuardianAction defaultAction = GuardianAction.ALLOW;
+    protected boolean messageVariables = true;
+
+    public Guardian defaultAction(GuardianAction defaultAction) {
+        this.defaultAction = defaultAction;
+        return this;
+    }
+
+    public Guardian messageVariables(boolean messageVariables) {
+        this.messageVariables = messageVariables;
+        return this;
+    }
 
     public String evaluate(@NonNull Guard guard, @NonNull GuardianContext context) {
         return "true";
@@ -59,10 +70,12 @@ public class Guardian {
         }
 
         String error = guard.message();
-        error = error.replace("{mode}", GuardMode.of(guard).name());
-        error = error.replace("{value}", guard.value());
-        error = error.replace("{allow}", Arrays.toString(guard.allow()));
-        error = error.replace("{deny}", Arrays.toString(guard.deny()));
+        if (this.messageVariables) {
+            error = error.replace("{mode}", GuardMode.of(guard).name());
+            error = error.replace("{value}", guard.value());
+            error = error.replace("{allow}", Arrays.toString(guard.allow()));
+            error = error.replace("{deny}", Arrays.toString(guard.deny()));
+        }
 
         return Collections.singletonList(new GuardianViolation(
             result,
