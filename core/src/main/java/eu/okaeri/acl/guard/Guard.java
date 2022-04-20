@@ -8,7 +8,7 @@ import java.lang.annotation.*;
 public @interface Guard {
 
     String value();
-    String message() default "failed test '{value}'";
+    String message() default "";
     String[] allow() default {};
     String[] deny() default {};
 
