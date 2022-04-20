@@ -36,6 +36,20 @@ public class Guardian {
         return "true";
     }
 
+    private String _evaluate(@NonNull Guard guard, @NonNull GuardianContext context) {
+
+        long start = System.nanoTime();
+        String result = this.evaluate(guard, context);
+
+        if (DEBUG) {
+            long took = System.nanoTime() - start;
+            long tookMs = took / 1000L / 1000L;
+            LOGGER.info(guard + " was evaluated to '" + result + "' in " + tookMs + "ms/" + took + "ns with " + context);
+        }
+
+        return result;
+    }
+
     public boolean allows(Guard guard, String result) {
         switch (GuardMode.of(guard)) {
             case BOOLEAN:
@@ -50,29 +64,14 @@ public class Guardian {
     }
 
     public boolean allows(@NonNull Guard guard, @NonNull GuardianContext context) {
-
-        long start = System.currentTimeMillis();
-        String result = this.evaluate(guard, context);
-
-        if (DEBUG) {
-            long took = System.currentTimeMillis() - start;
-            LOGGER.info(guard + " was evaluated to '" + result + "' in " + took + " ms with " + context);
-        }
-
-        return this.allows(guard, result);
+        return this.allows(guard, this._evaluate(guard, context));
     }
 
     public List<GuardianViolation> inspect(@NonNull Guard guard, @NonNull GuardianContext context) {
 
-        long start = System.currentTimeMillis();
-        String result = this.evaluate(guard, context);
-
-        if (DEBUG) {
-            long took = System.currentTimeMillis() - start;
-            LOGGER.info(guard + " was evaluated to '" + result + "' in " + took + " ms with " + context);
-        }
-
+        String result = this._evaluate(guard, context);
         boolean allows = this.allows(guard, result);
+
         if (allows) {
             return Collections.emptyList();
         }
