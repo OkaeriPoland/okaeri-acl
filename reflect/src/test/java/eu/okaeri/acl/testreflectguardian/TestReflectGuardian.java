@@ -21,35 +21,34 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TestReflectGuardian {
 
+    private final ReflectGuardian guardian = ReflectGuardian.create(ReflectPlaceholders.create());
+
     @Test
     @SneakyThrows
     public void should_allow_no_guards() {
 
-        ReflectGuardian guardian = ReflectGuardian.create(ReflectPlaceholders.create());
         GuardianContext context = GuardianContext.of().with("key", "value");
         Method method = EmptyType.class.getMethod("doNothing");
 
-        assertTrue(guardian.allows(method, context));
-        assertTrue(guardian.inspect(method, context).isEmpty());
+        assertTrue(this.guardian.allows(method, context));
+        assertTrue(this.guardian.inspect(method, context).isEmpty());
     }
 
     @Test
     @SneakyThrows
     public void should_allow_in_mode_boolean() {
 
-        ReflectGuardian guardian = ReflectGuardian.create(ReflectPlaceholders.create());
         GuardianContext context = GuardianContext.of().with("player", new FakePlayer().perm("test:admin"));
         Method method = GuardedType.class.getMethod("simpleWithBoolean");
 
-        assertTrue(guardian.allows(method, context));
-        assertEquals(0, guardian.inspect(method, context).size());
+        assertTrue(this.guardian.allows(method, context));
+        assertEquals(0, this.guardian.inspect(method, context).size());
     }
 
     @Test
     @SneakyThrows
     public void should_deny_in_mode_boolean() {
 
-        ReflectGuardian guardian = ReflectGuardian.create(ReflectPlaceholders.create());
         GuardianContext context = GuardianContext.of().with("player", new FakePlayer().perm("test:user"));
         Method method = GuardedType.class.getMethod("simpleWithBoolean");
 
@@ -61,66 +60,59 @@ public class TestReflectGuardian {
             GuardianAction.DENY
         );
 
-        assertFalse(guardian.allows(method, context));
-        assertIterableEquals(Collections.singletonList(violation), guardian.inspect(method, context));
+        assertFalse(this.guardian.allows(method, context));
+        assertIterableEquals(Collections.singletonList(violation), this.guardian.inspect(method, context));
     }
 
     @Test
     @SneakyThrows
     public void should_allow_in_mode_allow() {
-        ReflectGuardian guardian = ReflectGuardian.create(ReflectPlaceholders.create());
         GuardianContext context = GuardianContext.of().with("player", new FakePlayer().role("ADMIN"));
-        assertTrue(guardian.allows(GuardedType.class.getMethod("simpleWithAllow"), context));
+        assertTrue(this.guardian.allows(GuardedType.class.getMethod("simpleWithAllow"), context));
     }
 
     @Test
     @SneakyThrows
     public void should_deny_in_mode_allow() {
-        ReflectGuardian guardian = ReflectGuardian.create(ReflectPlaceholders.create());
         GuardianContext context = GuardianContext.of().with("player", new FakePlayer().role("USER"));
-        assertFalse(guardian.allows(GuardedType.class.getMethod("simpleWithAllow"), context));
+        assertFalse(this.guardian.allows(GuardedType.class.getMethod("simpleWithAllow"), context));
     }
 
     @Test
     @SneakyThrows
     public void should_allow_in_mode_deny() {
-        ReflectGuardian guardian = ReflectGuardian.create(ReflectPlaceholders.create());
         GuardianContext context = GuardianContext.of().with("player", new FakePlayer().role("ADMIN"));
-        assertTrue(guardian.allows(GuardedType.class.getMethod("simpleWithDeny"), context));
+        assertTrue(this.guardian.allows(GuardedType.class.getMethod("simpleWithDeny"), context));
     }
 
     @Test
     @SneakyThrows
     public void should_deny_in_mode_deny() {
-        ReflectGuardian guardian = ReflectGuardian.create(ReflectPlaceholders.create());
         GuardianContext context = GuardianContext.of().with("player", new FakePlayer().role("BANNED"));
-        assertFalse(guardian.allows(GuardedType.class.getMethod("simpleWithDeny"), context));
+        assertFalse(this.guardian.allows(GuardedType.class.getMethod("simpleWithDeny"), context));
     }
 
     @Test
     @SneakyThrows
     public void should_allow_in_mode_boolean_multi() {
-        ReflectGuardian guardian = ReflectGuardian.create(ReflectPlaceholders.create());
         GuardianContext context = GuardianContext.of().with("player", new FakePlayer().perm("test:admin").role("ADMIN"));
-        assertTrue(guardian.allows(GuardedType.class.getMethod("multiWithBoolean"), context));
+        assertTrue(this.guardian.allows(GuardedType.class.getMethod("multiWithBoolean"), context));
     }
 
     @Test
     @SneakyThrows
     public void should_deny_in_mode_boolean_multi() {
 
-        ReflectGuardian guardian = ReflectGuardian.create(ReflectPlaceholders.create());
-
         // no perm and role
-        assertFalse(guardian.allows(GuardedType.class.getMethod("multiWithBoolean"),
+        assertFalse(this.guardian.allows(GuardedType.class.getMethod("multiWithBoolean"),
             GuardianContext.of().with("player", new FakePlayer())));
 
         // perm mismatch
-        assertFalse(guardian.allows(GuardedType.class.getMethod("multiWithBoolean"),
+        assertFalse(this.guardian.allows(GuardedType.class.getMethod("multiWithBoolean"),
             GuardianContext.of().with("player", new FakePlayer().perm("test:user"))));
 
         // role mismatch
-        assertFalse(guardian.allows(GuardedType.class.getMethod("multiWithBoolean"),
+        assertFalse(this.guardian.allows(GuardedType.class.getMethod("multiWithBoolean"),
             GuardianContext.of().with("player", new FakePlayer().role("BANNED"))));
     }
 
@@ -128,9 +120,7 @@ public class TestReflectGuardian {
     @SneakyThrows
     public void should_deny_in_mode_boolean_multi_inspect() {
 
-        ReflectGuardian guardian = ReflectGuardian.create(ReflectPlaceholders.create());
-
-        List<GuardianViolation> violations = guardian.inspect(
+        List<GuardianViolation> violations = this.guardian.inspect(
             GuardedType.class.getMethod("multiWithBoolean"),
             GuardianContext.of().with("player", new FakePlayer().perm("test:user").role("BANNED"))
         );
