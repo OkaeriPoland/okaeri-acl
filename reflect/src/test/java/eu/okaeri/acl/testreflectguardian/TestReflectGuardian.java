@@ -55,7 +55,7 @@ public class TestReflectGuardian {
 
         GuardianViolation violation = new GuardianViolation(
             "false",
-            "failed test 'player.hasPermission('test:admin')'",
+            "",
             Collections.emptySet(),
             Collections.emptySet(),
             GuardianAction.DENY
@@ -138,14 +138,14 @@ public class TestReflectGuardian {
         assertIterableEquals(Arrays.asList(
                 new GuardianViolation(
                     "false",
-                    "failed test 'player.hasPermission('test:admin')'",
+                    "",
                     Collections.emptySet(),
                     Collections.emptySet(),
                     GuardianAction.DENY
                 ),
                 new GuardianViolation(
                     "BANNED",
-                    "failed test 'player.role()'",
+                    "",
                     Collections.emptySet(),
                     Collections.singleton("BANNED"),
                     GuardianAction.DENY
