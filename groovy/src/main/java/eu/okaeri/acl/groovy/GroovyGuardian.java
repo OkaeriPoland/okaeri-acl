@@ -13,16 +13,20 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 @Getter
 @Setter
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class GroovyGuardian extends Guardian {
 
-    private final Map<String, Script> scriptCache = new ConcurrentHashMap<>();
+    private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("okaeri.platform.debug", "false"));
+    private static final Logger LOGGER = Logger.getLogger(GroovyGuardian.class.getSimpleName());
 
-    private CompilerConfiguration compilerConfiguration;
-    private final GroovyShell groovyShell;
+    protected final Map<String, Script> scriptCache = new ConcurrentHashMap<>();
+
+    protected CompilerConfiguration compilerConfiguration;
+    protected final GroovyShell groovyShell;
 
     public static GroovyGuardian create(@NonNull CompilerConfiguration compilerConfiguration) {
         GroovyGuardian guardian = new GroovyGuardian(compilerConfiguration, new GroovyShell(compilerConfiguration));
@@ -37,7 +41,7 @@ public class GroovyGuardian extends Guardian {
     @Override
     public String evaluate(@NonNull Guard guard, @NonNull GuardianContext context) {
 
-        Script script = this.scriptCache.computeIfAbsent(guard.value(), this.groovyShell::parse);
+        Script script = this.scriptCache.computeIfAbsent(guard.value(), this::parse);
         script.setBinding(new Binding(context.getData()));
 
         return String.valueOf(script.run());
@@ -65,10 +69,28 @@ public class GroovyGuardian extends Guardian {
     }
 
     public boolean prime(@NonNull String expression) {
+
         if (this.scriptCache.containsKey(expression)) {
             return false;
         }
-        this.scriptCache.put(expression, this.groovyShell.parse(expression));
+
+        Script script = this.parse(expression);
+        this.scriptCache.put(expression, script);
+
         return true;
+    }
+
+    protected Script parse(@NonNull String expression) {
+
+        long start = System.nanoTime();
+        Script script = this.groovyShell.parse(expression);
+
+        if (DEBUG) {
+            long took = System.nanoTime() - start;
+            long tookMs = took / 1000L / 1000L;
+            LOGGER.info("Parsed '" + expression + "' in " + tookMs + "ms/" + took + "ns");
+        }
+
+        return script;
     }
 }
