@@ -6,7 +6,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Getter
-@ToString
 @EqualsAndHashCode
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
@@ -29,8 +28,6 @@ public class GuardianContext {
 
     @Override
     public String toString() {
-        return "GuardianContext(" +
-            "data=" + data.keySet() +
-            ')';
+        return "GuardianContext(data=" + data.keySet() + ')';
     }
 }
