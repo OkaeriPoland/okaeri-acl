@@ -17,7 +17,7 @@ public class GuardianContext {
         return new GuardianContext();
     }
 
-    public static GuardianContext of(Map<String, Object> data) {
+    public static GuardianContext of(@NonNull Map<String, Object> data) {
         return new GuardianContext(data);
     }
 
